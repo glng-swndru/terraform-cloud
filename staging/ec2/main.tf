@@ -12,5 +12,5 @@ module "web-server-prod" {
   elb_availability_zones = ["us-west-2a", "us-west-2b"]
  vpc_id                  = "vpc-0ae9320d2378da536"
   subnets                = [ "subnet-0bde42ef0439aa554", "subnet-0e00f52c5201d9209"  ]
-  environment = "prod"
+  environment = "staging"
 }
