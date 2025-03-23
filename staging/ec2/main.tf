@@ -1,6 +1,6 @@
 module "web-server-prod" {
   source = "../../modules/ec2"
-  
+   
   ami                    = "ami-0520f976ad2e6300c"
   instance_type          = "t2.micro"
   tag_name               = "web-server"
