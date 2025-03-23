@@ -65,31 +65,3 @@ variable "environment" {
     type        = string
   
 }
-
-# CIDR blok untuk VPC
-variable "vpc_cidr" {
-  description = "CIDR block for the VPC"
-  type        = string
-  default     = "10.0.0.0/16"
-}
-
-# CIDR blok untuk subnet A
-variable "subnet_a_cidr" {
-  description = "CIDR block for subnet A"
-  type        = string
-  default     = "10.0.1.0/24"
-}
-
-# CIDR blok untuk subnet B
-variable "subnet_b_cidr" {
-  description = "CIDR block for subnet B"
-  type        = string
-  default     = "10.0.2.0/24"
-}
-
-# Availability Zones untuk VPC
-variable "availability_zones" {
-  description = "List of availability zones to deploy the VPC and subnets"
-  type        = list(string)
-  default     = ["us-west-2a", "us-west-2b"]
-}
