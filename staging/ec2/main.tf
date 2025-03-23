@@ -4,8 +4,8 @@ module "web-server-staging" {
   ami                    = "ami-0520f976ad2e6300c"
   instance_type          = "t2.micro"
   tag_name               = "web-server"
-  instance_min_count     = 2
-  instance_max_count     = 3
+  instance_min_count     = 1
+  instance_max_count     = 2
   cluster_name           = "web-server"
   key_pair               = "terraform-key-pair"
   asg_availability_zones = ["us-west-2a", "us-west-2b"]
