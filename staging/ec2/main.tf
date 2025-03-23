@@ -1,4 +1,4 @@
-module "web-server-prod" {
+module "web-server-staging" {
   source = "../../modules/ec2"
   
   ami                    = "ami-0520f976ad2e6300c"
