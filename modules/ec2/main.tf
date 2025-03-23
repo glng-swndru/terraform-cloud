@@ -1,33 +1,24 @@
 # Membuat VPC
 resource "aws_vpc" "main" {
-  cidr_block = "10.0.0.0/16"
+  cidr_block = var.vpc_cidr
   enable_dns_support = true
   enable_dns_hostnames = true
-  tags = {
-    Name = "${var.cluster_name}-${var.environment}-vpc"
-  }
 }
 
-# Membuat 2 Subnet di VPC
+# Membuat subnet di availability zone pertama
 resource "aws_subnet" "subnet_a" {
-  vpc_id                  = aws_vpc.main.id
-  cidr_block              = "10.0.1.0/24"
-  availability_zone       = "us-west-2a"
-  map_public_ip_on_launch = true
-  tags = {
-    Name = "${var.cluster_name}-${var.environment}-subnet-a"
-  }
+  vpc_id            = aws_vpc.main.id
+  cidr_block        = var.subnet_a_cidr
+  availability_zone = var.availability_zones[0]
 }
 
+# Membuat subnet di availability zone kedua
 resource "aws_subnet" "subnet_b" {
-  vpc_id                  = aws_vpc.main.id
-  cidr_block              = "10.0.2.0/24"
-  availability_zone       = "us-west-2b"
-  map_public_ip_on_launch = true
-  tags = {
-    Name = "${var.cluster_name}-${var.environment}-subnet-b"
-  }
+  vpc_id            = aws_vpc.main.id
+  cidr_block        = var.subnet_b_cidr
+  availability_zone = var.availability_zones[1]
 }
+
 
 # Membuat Internet Gateway dan attach ke VPC
 resource "aws_internet_gateway" "gw" {

@@ -10,7 +10,9 @@ module "web-server-prod" {
   key_pair               = "terraform-key-pair"
   asg_availability_zones = ["us-west-2a", "us-west-2b"]
   elb_availability_zones = ["us-west-2a", "us-west-2b"]
-  vpc_id                 = aws_vpc.main.id  # Menggunakan vpc_id yang terbuat di modul
-  subnets                = [aws_subnet.subnet_a.id, aws_subnet.subnet_b.id]  # Menggunakan subnet yang terbuat di modul
+  
+  # Referencing VPC and subnets from ec2 module
+  vpc_id                 = module.web-server-prod.vpc_id
+  subnets                = [module.web-server-prod.subnet_a_id, module.web-server-prod.subnet_b_id]
   environment            = "prod"
 }
