@@ -71,7 +71,7 @@ resource "aws_lb" "web_service" {
 }
 
 resource "aws_lb_target_group" "web_service" {
-  name     = "${substr(var.cluster_name, 0, 10)}-${substr(var.environment, 0, 10)}-tg"
+  name     = "${substr("${var.cluster_name}-${var.environment}-tg-${timestamp()}", 0, 32)}"
   port     = 80
   protocol = "HTTP"
   vpc_id   = var.vpc_id
