@@ -2,25 +2,28 @@ resource "aws_launch_template" "example" {
   name          = "${var.cluster_name}-${var.environment}"
   image_id      = var.ami
   instance_type = var.instance_type
-
-  key_name          = var.key_pair
-  vpc_security_group_ids = [ aws_security_group.web_service.id ]
+  key_name      = var.key_pair
+  
   network_interfaces {
     associate_public_ip_address = false
+    security_groups            = [aws_security_group.web_service.id]
   }
 
-  user_data = <<-EOF
+  user_data = base64encode(<<-EOF
                 #!/bin/bash
                 apt-get update -y
                 apt-get install -y python3
                 echo "Hello, World!" > index.html
                 nohup python3 -m http.server 80 &
-                EOF
+              EOF
+            )
 
   lifecycle {
-    create_before_destroy = false
+    create_before_destroy = true
   }
 }
+
+
 
 resource "aws_autoscaling_group" "web_service" {
   launch_template {
@@ -68,11 +71,12 @@ resource "aws_lb" "web_service" {
 }
 
 resource "aws_lb_target_group" "web_service" {
-  name     = "${var.cluster_name}-${var.environment}-target-group-${timestamp()}"
+  name     = "${substr(var.cluster_name, 0, 10)}-${substr(var.environment, 0, 10)}-tg"
   port     = 80
   protocol = "HTTP"
   vpc_id   = var.vpc_id
 }
+
 
 resource "aws_lb_listener" "web_service" {
   load_balancer_arn = aws_lb.web_service.arn
