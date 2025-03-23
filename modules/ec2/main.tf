@@ -1,3 +1,29 @@
+
+resource "aws_launch_template" "example" {
+  name          = "${var.cluster_name}-${var.environment}"
+  image_id      = var.ami
+  instance_type = var.instance_type
+  key_name      = var.key_pair
+  
+  network_interfaces {
+    associate_public_ip_address = false
+    security_groups            = [aws_security_group.web_service.id]
+  }
+
+  user_data = base64encode(<<-EOF
+                #!/bin/bash
+                apt-get update -y
+                apt-get install -y python3
+                echo "Hello, World!" > index.html
+                nohup python3 -m http.server 80 &
+              EOF
+            )
+
+  lifecycle {
+    create_before_destroy = true
+  }
+}
+
 # Membuat VPC
 resource "aws_vpc" "main" {
   cidr_block = var.vpc_cidr
@@ -28,32 +54,24 @@ resource "aws_internet_gateway" "gw" {
   }
 }
 
-# Membuat Route Table untuk Internet Gateway
-resource "aws_route_table" "internet" {
-  vpc_id = aws_vpc.main.id
-
-  route {
-    cidr_block = "0.0.0.0/0"
-    gateway_id = aws_internet_gateway.gw.id
+resource "aws_autoscaling_group" "web_service" {
+  launch_template {
+    id      = aws_launch_template.example.id
+    version = "$Latest"
   }
-
-  tags = {
-    Name = "${var.cluster_name}-${var.environment}-rtb"
+  target_group_arns    = [aws_lb_target_group.web_service.arn]
+  min_size             = var.instance_min_count
+  max_size             = var.instance_max_count
+  health_check_type    = "ELB"
+  availability_zones   = var.asg_availability_zones
+  tag {
+    key                 = "Name"
+    value               = "web-instance-${var.environment}"
+    propagate_at_launch = true
   }
 }
 
-# Mengasosiasikan route table ke subnet
-resource "aws_route_table_association" "subnet_a" {
-  subnet_id      = aws_subnet.subnet_a.id
-  route_table_id = aws_route_table.internet.id
-}
 
-resource "aws_route_table_association" "subnet_b" {
-  subnet_id      = aws_subnet.subnet_b.id
-  route_table_id = aws_route_table.internet.id
-}
-
-# Security Group untuk Web Service
 resource "aws_security_group" "web_service" {
   name = "${var.cluster_name}-${var.environment}-alb"
 
@@ -72,24 +90,23 @@ resource "aws_security_group" "web_service" {
   }
 }
 
-# Load Balancer untuk Web Service
 resource "aws_lb" "web_service" {
-  name               = "${var.cluster_name}-${var.environment}-load-balancer"
+  name               = "${var.cluster_name}-${var.environment}-lb"
   internal           = false
   load_balancer_type = "application"
   security_groups    = [aws_security_group.web_service.id]
-  subnets            = [aws_subnet.subnet_a.id, aws_subnet.subnet_b.id]
+  subnets            = var.subnets
+
 }
 
-# Target Group untuk Load Balancer
 resource "aws_lb_target_group" "web_service" {
-  name     = "${var.cluster_name}-${var.environment}-target-group"
+  name     = "${substr("${var.cluster_name}-${var.environment}-tg-${timestamp()}", 0, 32)}"
   port     = 80
   protocol = "HTTP"
-  vpc_id   = aws_vpc.main.id
+  vpc_id   = var.vpc_id
 }
 
-# Listener untuk Load Balancer
+
 resource "aws_lb_listener" "web_service" {
   load_balancer_arn = aws_lb.web_service.arn
   port              = 80
@@ -98,45 +115,5 @@ resource "aws_lb_listener" "web_service" {
   default_action {
     type             = "forward"
     target_group_arn = aws_lb_target_group.web_service.arn
-  }
-}
-
-# Launch Configuration untuk EC2 Instances
-resource "aws_launch_configuration" "example" {
-  name                      = "${var.cluster_name}-${var.environment}"
-  image_id                  = var.ami
-  instance_type             = var.instance_type
-  key_name                  = var.key_pair
-  security_groups           = [aws_security_group.web_service.id]
-  associate_public_ip_address = true
-
-  user_data = <<-EOF
-                #!/bin/bash
-                apt-get update -y
-                apt-get install -y python3
-                echo "Hello, World!" > index.html
-                nohup python3 -m http.server 80 &
-                EOF
-
-  lifecycle {
-    create_before_destroy = false
-  }
-}
-
-# Auto Scaling Group untuk EC2 Instances
-resource "aws_autoscaling_group" "web_service" {
-  launch_configuration = aws_launch_configuration.example.id
-  target_group_arns    = [aws_lb_target_group.web_service.arn]
-  min_size             = var.instance_min_count
-  max_size             = var.instance_max_count
-  health_check_type    = "ELB"
-
-  availability_zones   = var.asg_availability_zones
-  vpc_zone_identifier  = [aws_subnet.subnet_a.id, aws_subnet.subnet_b.id]
-  
-  tag {
-    key                 = "Name"
-    value               = "web-instance-${var.environment}"
-    propagate_at_launch = true
   }
 }
