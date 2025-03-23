@@ -14,3 +14,10 @@ module "web-server-prod" {
   subnets                = [ "subnet-0bde42ef0439aa554", "subnet-0e00f52c5201d9209"  ]
   environment = "prod"
 }
+  
+  # Referencing VPC and subnets from ec2 module
+  vpc_id                 = module.web-server-prod.vpc_id
+  subnets                = [module.web-server-prod.subnet_a_id, module.web-server-prod.subnet_b_id]
+  environment            = "prod"
+}
+

@@ -1,3 +1,4 @@
+
 resource "aws_launch_template" "example" {
   name          = "${var.cluster_name}-${var.environment}"
   image_id      = var.ami
@@ -23,7 +24,35 @@ resource "aws_launch_template" "example" {
   }
 }
 
+# Membuat VPC
+resource "aws_vpc" "main" {
+  cidr_block = var.vpc_cidr
+  enable_dns_support = true
+  enable_dns_hostnames = true
+}
 
+# Membuat subnet di availability zone pertama
+resource "aws_subnet" "subnet_a" {
+  vpc_id            = aws_vpc.main.id
+  cidr_block        = var.subnet_a_cidr
+  availability_zone = var.availability_zones[0]
+}
+
+# Membuat subnet di availability zone kedua
+resource "aws_subnet" "subnet_b" {
+  vpc_id            = aws_vpc.main.id
+  cidr_block        = var.subnet_b_cidr
+  availability_zone = var.availability_zones[1]
+}
+
+
+# Membuat Internet Gateway dan attach ke VPC
+resource "aws_internet_gateway" "gw" {
+  vpc_id = aws_vpc.main.id
+  tags = {
+    Name = "${var.cluster_name}-${var.environment}-igw"
+  }
+}
 
 resource "aws_autoscaling_group" "web_service" {
   launch_template {
