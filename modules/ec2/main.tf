@@ -1,11 +1,13 @@
-resource "aws_launch_configuration" "example" {
+resource "aws_launch_template" "example" {
   name          = "${var.cluster_name}-${var.environment}"
   image_id      = var.ami
   instance_type = var.instance_type
 
   key_name          = var.key_pair
-  security_groups   = [ aws_security_group.web_service.id ]
-  associate_public_ip_address = false
+  vpc_security_group_ids = [ aws_security_group.web_service.id ]
+  network_interfaces {
+    associate_public_ip_address = false
+  }
 
   user_data = <<-EOF
                 #!/bin/bash
@@ -21,12 +23,14 @@ resource "aws_launch_configuration" "example" {
 }
 
 resource "aws_autoscaling_group" "web_service" {
-  launch_configuration = aws_launch_configuration.example.id
+  launch_template {
+    id      = aws_launch_template.example.id
+    version = "$Latest"
+  }
   target_group_arns    = [aws_lb_target_group.web_service.arn]
   min_size             = var.instance_min_count
   max_size             = var.instance_max_count
   health_check_type    = "ELB"
-
   availability_zones   = var.asg_availability_zones
   tag {
     key                 = "Name"
@@ -34,6 +38,7 @@ resource "aws_autoscaling_group" "web_service" {
     propagate_at_launch = true
   }
 }
+
 
 resource "aws_security_group" "web_service" {
   name = "${var.cluster_name}-${var.environment}-alb"
@@ -63,7 +68,7 @@ resource "aws_lb" "web_service" {
 }
 
 resource "aws_lb_target_group" "web_service" {
-  name     = "${var.cluster_name}-${var.environment}-tg"
+  name     = "${var.cluster_name}-${var.environment}-target-group-${timestamp()}"
   port     = 80
   protocol = "HTTP"
   vpc_id   = var.vpc_id
