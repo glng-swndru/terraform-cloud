@@ -51,22 +51,39 @@ Once deployed, you should see:
 - **Security Groups** ensuring controlled network access.
 - Terraform Cloud UI showing the successful deployment with logs.
 
-## Screenchot
-![variable](docs/images/variable.png)
+## Screenshots
 
-![Instance](docs/images/instance.png)
+### 1. Terraform Cloud Variables  
+*Workspace variables including AWS credentials and environment-specific settings.*  
+![variable](docs/images/variable.png)  
 
-![load balancer](docs/images/lb.png)
+### 2. EC2 Instances Running  
+*List of EC2 instances launched by Terraform, managed by the Auto Scaling Group.*  
+![Instance](docs/images/instance.png)  
 
-![scaling](docs/images/scaling.png)
+### 3. Application Load Balancer  
+*The ALB distributing incoming traffic to EC2 instances.*  
+![load balancer](docs/images/lb.png)  
 
-![security group](docs/images/sg.png)
+### 4. Auto Scaling Configuration  
+*Settings for the Auto Scaling Group, showing scaling policies and active instances.*  
+![scaling](docs/images/scaling.png)  
 
-![target group](docs/images/tg.png)
+### 5. Security Group Rules  
+*Configured security groups that control network access to the instances.*  
+![security group](docs/images/sg.png)  
 
-![terraform run](docs/images/run.png)
+### 6. Target Group  
+*The target group associated with the ALB, ensuring traffic is routed to healthy instances.*  
+![target group](docs/images/tg.png)  
 
-![terraform destroy](docs/images/destroy.png)
+### 7. Terraform Run Execution  
+*Terraform Cloud logs showing the `terraform plan` and `terraform apply` process.*  
+![terraform run](docs/images/run.png)  
+
+### 8. Terraform Destroy Execution  
+*Terraform Cloud logs showing the `terraform destroy` process to remove deployed resources.*  
+![terraform destroy](docs/images/destroy.png)  
 
 ## Next Steps
 - Add **monitoring and logging** (e.g., CloudWatch, Prometheus, ELK Stack).
@@ -75,4 +92,3 @@ Once deployed, you should see:
 
 ---
 ### Repository: [GitHub - terraform-cloud](https://github.com/glng-swndru/terraform-cloud)
-
