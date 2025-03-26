@@ -51,13 +51,22 @@ Once deployed, you should see:
 - **Security Groups** ensuring controlled network access.
 - Terraform Cloud UI showing the successful deployment with logs.
 
+## Screenchot
 ![variable](docs/images/variable.png)
+
 ![Instance](docs/images/instance.png)
+
 ![load balancer](docs/images/lb.png)
+
 ![scaling](docs/images/scaling.png)
+
 ![security group](docs/images/sg.png)
+
 ![target group](docs/images/tg.png)
+
 ![terraform run](docs/images/run.png)
+
+![terraform destroy](docs/images/destroy.png)
 
 ## Next Steps
 - Add **monitoring and logging** (e.g., CloudWatch, Prometheus, ELK Stack).
